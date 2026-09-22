@@ -2,6 +2,9 @@
 
 An end-to-end TensorFlow project that predicts Fat, Protein, and Lactose content in raw milk directly from Near-Infrared (NIR) spectroscopy data — enabling real-time, non-destructive milk quality analysis on the farm.
 
+**Live API:** https://milk-api-zmr9.onrender.com
+**Interactive Docs:** https://milk-api-zmr9.onrender.com/docs
+
 ## Problem Statement
 
 Traditional milk composition testing requires chemical analysis in a laboratory. This is:
@@ -46,7 +49,10 @@ Interpretation: Fat is highly predictable from NIR data (strong absorption bands
 
 ## Deployment
 
-The trained model is served as a REST API using FastAPI.
+The trained model is served as a REST API using FastAPI, deployed on Render.
+
+**Live API:** https://milk-api-zmr9.onrender.com
+**Interactive Docs:** https://milk-api-zmr9.onrender.com/docs
 
 Endpoints:
 
@@ -55,13 +61,15 @@ Endpoints:
 - POST /predict  - Predict composition from 256 spectra
 - GET /docs      - Interactive Swagger UI
 
-Example Request:
+Example Request (public API):
 
-curl -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" -d "{\"spectra\": [0.01, 0.02, 0.55]}"
+curl -X POST "https://milk-api-zmr9.onrender.com/predict" -H "Content-Type: application/json" -d "{\"spectra\": [0.01, 0.02, 0.55]}"
 
 Example Response:
 
 {"Fat": 2.814, "Prot": 3.208, "Lact": 4.719}
+
+Note: The free Render instance spins down after 15 minutes of inactivity. First request after idle may take up to 50 seconds.
 
 ## Tech Stack
 
@@ -71,6 +79,7 @@ Example Response:
 - Uvicorn - ASGI server
 - scikit-learn - metrics, preprocessing
 - NumPy / pandas - data handling
+- Render - cloud deployment
 
 ## Project Structure
 
@@ -78,7 +87,9 @@ Example Response:
 - milk_model.keras   - Trained TensorFlow model
 - target_scaler.pkl  - StandardScaler for targets
 - requirements.txt   - Python dependencies
+- .python-version    - Python 3.13.5 pin for Render
 - .gitignore         - Git ignore rules
+- LICENSE            - MIT License
 - README.md          - This file
 
 ## How to Run Locally
@@ -104,4 +115,4 @@ U Narasimha - https://github.com/UNarasimha
 
 ## License
 
-This project is open-source under the MIT License.
+This project is open-source under the MIT License. See LICENSE file.
