@@ -1,228 +1,107 @@
-\# 🥛 Milk Composition Prediction from NIR Spectra
+# 🥛 Milk Composition Prediction from NIR Spectra
 
+An end-to-end TensorFlow project that predicts Fat, Protein, and Lactose content in raw milk directly from Near-Infrared (NIR) spectroscopy data — enabling real-time, non-destructive milk quality analysis on the farm.
 
-
-An end-to-end TensorFlow project that predicts \*\*Fat\*\*, \*\*Protein\*\*, and \*\*Lactose\*\* content in raw milk directly from Near-Infrared (NIR) spectroscopy data — enabling real-time, non-destructive milk quality analysis on the farm.
-
-
-
-\## 🎯 Problem Statement
-
-
+## Problem Statement
 
 Traditional milk composition testing requires chemical analysis in a laboratory. This is:
 
-\- \*\*Slow\*\* (hours to days)
+- Slow (hours to days)
+- Destructive (sample is consumed)
+- Expensive (lab equipment, technicians)
+- Not scalable for continuous farm-level monitoring
 
-\- \*\*Destructive\*\* (sample is consumed)
+Solution: A deep learning model that reads NIR light transmittance through raw milk and instantly predicts its chemical composition. Mimics a handheld on-farm sensor.
 
-\- \*\*Expensive\*\* (lab equipment, technicians)
+## Dataset
 
-\- \*\*Not scalable\*\* for continuous farm-level monitoring
+- Source: KU Leuven / Zenodo — "Near-infrared spectra dataset of milk composition in transmittance mode"
+- Samples: 1,224 raw milk measurements
+- Features: 256 spectral points (wavelength range 960-1690 nm)
+- Targets: Fat (%), Protein (%), Lactose (%)
+- Preprocessing: Absorbance computed from raw transmittance, then Standard Normal Variate (SNV) normalization per spectrum
 
-
-
-\*\*Solution:\*\* A deep learning model that reads NIR light transmittance through raw milk and instantly predicts its chemical composition. Mimics a handheld on-farm sensor.
-
-
-
-\## 📊 Dataset
-
-
-
-\- \*\*Source:\*\* \[KU Leuven / Zenodo](https://zenodo.org/records/8263430) — "Near-infrared spectra dataset of milk composition in transmittance mode"
-
-\- \*\*Samples:\*\* 1,224 raw milk measurements
-
-\- \*\*Features:\*\* 256 spectral points (wavelength range 960–1690 nm)
-
-\- \*\*Targets:\*\* Fat (%), Protein (%), Lactose (%)
-
-\- \*\*Preprocessing:\*\*
-
-&#x20; - Absorbance computed from raw transmittance: `A = -log10((Sample − Dark) / (White − Dark))`
-
-&#x20; - Standard Normal Variate (SNV) normalization per spectrum
-
-
-
-\## 🧠 Model Architecture
-
-
+## Model Architecture
 
 Feed-forward neural network built with TensorFlow/Keras:
 
-Input (256)
+Input (256) -> Dense(128) + ReLU + Dropout(0.3) -> Dense(64) + ReLU + Dropout(0.2) -> Dense(32) + ReLU -> Dense(3)
 
-&#x20; |
+Outputs: Fat, Protein, Lactose
 
-Dense(128) + ReLU + Dropout(0.3)
+- Loss: Mean Squared Error (MSE)
+- Optimizer: Adam (lr = 1e-3)
+- Regularization: Dropout + EarlyStopping
+- Training: 200 epochs max, batch size 32
 
-&#x20; |
+## Results
 
-Dense(64) + ReLU + Dropout(0.2)
-
-&#x20; |
-
-Dense(32) + ReLU
-
-&#x20; |
-
-Dense(3)   <- Fat, Protein, Lactose
-
-
-
-\- \*\*Loss:\*\* Mean Squared Error (MSE)
-
-\- \*\*Optimizer:\*\* Adam (lr = 1e-3)
-
-\- \*\*Regularization:\*\* Dropout + EarlyStopping
-
-\- \*\*Training:\*\* 200 epochs max, batch size 32
-
-
-
-\## 📈 Results
-
-
-
-| Target | RMSE | MAE | R² |
-
+| Target | RMSE | MAE | R2 |
 |--------|------|-----|-----|
+| Fat | 0.313 | 0.249 | 0.857 |
+| Protein | 0.298 | 0.237 | 0.271 |
+| Lactose | 0.157 | 0.120 | 0.209 |
 
-| \*\*Fat\*\* | 0.313 | 0.249 | \*\*0.857\*\* |
+Interpretation: Fat is highly predictable from NIR data (strong absorption bands). Protein and Lactose show weaker predictability due to overlapping water absorption bands — consistent with published NIR spectroscopy literature.
 
-| \*\*Protein\*\* | 0.298 | 0.237 | 0.271 |
+## Deployment
 
-| \*\*Lactose\*\* | 0.157 | 0.120 | 0.209 |
+The trained model is served as a REST API using FastAPI.
 
+Endpoints:
 
+- GET /          - API info
+- GET /health    - Health check
+- POST /predict  - Predict composition from 256 spectra
+- GET /docs      - Interactive Swagger UI
 
-\*\*Interpretation:\*\* Fat is highly predictable from NIR data (strong absorption bands). Protein and Lactose show weaker predictability due to overlapping water absorption bands — consistent with published NIR spectroscopy literature.
+Example Request:
 
+curl -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" -d "{\"spectra\": [0.01, 0.02, 0.55]}"
 
+Example Response:
 
-\## 🚀 Deployment
+{"Fat": 2.814, "Prot": 3.208, "Lact": 4.719}
 
+## Tech Stack
 
+- Python 3.13
+- TensorFlow 2.21 - model training
+- FastAPI - REST API serving
+- Uvicorn - ASGI server
+- scikit-learn - metrics, preprocessing
+- NumPy / pandas - data handling
 
-The trained model is served as a \*\*REST API\*\* using FastAPI.
+## Project Structure
 
+- main.py            - FastAPI application
+- milk_model.keras   - Trained TensorFlow model
+- target_scaler.pkl  - StandardScaler for targets
+- requirements.txt   - Python dependencies
+- .gitignore         - Git ignore rules
+- README.md          - This file
 
+## How to Run Locally
 
-\### Endpoints
+1. Clone the repository:
 
+   git clone https://github.com/UNarasimha/milk-api.git
+   cd milk-api
 
+2. Install dependencies:
 
-| Method | Endpoint | Description |
+   pip install -r requirements.txt
 
-|--------|----------|-------------|
+3. Start the API:
 
-| GET | `/` | API info |
+   python -m uvicorn main:app --reload --port 8000
 
-| GET | `/health` | Health check |
+4. Open the interactive docs at http://127.0.0.1:8000/docs
 
-| POST | `/predict` | Predict composition from 256 spectra |
+## Author
 
-| GET | `/docs` | Interactive Swagger UI |
+U Narasimha - https://github.com/UNarasimha
 
-
-
-\### Example Request
-
-
-
-```bash
-
-curl -X POST "http://localhost:8000/predict" \\
-
-&#x20; -H "Content-Type: application/json" \\
-
-&#x20; -d '{"spectra": \[0.01, 0.02, ..., 0.55]}'
-
-
-
-\### Example Response
-
-
-
-```json
-
-{
-
-&#x20; "Fat": 2.814,
-
-&#x20; "Prot": 3.208,
-
-&#x20; "Lact": 4.719
-
-}
-
-🛠️ Tech Stack
-
-Python 3.13
-
-
-
-TensorFlow 2.21 — model training
-
-
-
-FastAPI — REST API serving
-
-
-
-Uvicorn — ASGI server
-
-
-
-scikit-learn — metrics, preprocessing
-
-
-
-NumPy / pandas — data handling
-
-Project Structure
-
-milk-api/
-
-├── main.py               # FastAPI application
-
-├── milk\_model.keras      # Trained TensorFlow model
-
-├── target\_scaler.pkl     # StandardScaler for targets
-
-├── requirements.txt      # Python dependencies
-
-├── .gitignore            # Git ignore rules
-
-└── README.md             # This file
-
-How to Run Locally
-
-1.Clone the repository:
-
-git clone https://github.com/UNarasimha/milk-api.git
-
-cd milk-api
-
-2.Install dependencies:
-
-pip install -r requirements.txt
-
-3.Start the API:
-
-python -m uvicorn main:app --reload --port 8000
-
-4.Open the interactive docs:
-
-http://127.0.0.1:8000/docs
-
-Author
-
-U Narasimha — GitHub
-
-License
+## License
 
 This project is open-source under the MIT License.
-
