@@ -1,3 +1,5 @@
+![CI](https://github.com/UNarasimha/milk-api/actions/workflows/ci.yml/badge.svg)
+
 # 🥛 Milk Composition Prediction from NIR Spectra
 
 An end-to-end TensorFlow project that predicts Fat, Protein, and Lactose content in raw milk directly from Near-Infrared (NIR) spectroscopy data — enabling real-time, non-destructive milk quality analysis on the farm.
@@ -97,6 +99,16 @@ Run the container:
 
 Test the containerized API at http://localhost:8000/docs
 
+## CI/CD
+
+This project uses GitHub Actions for continuous integration. Every push to `main`:
+
+- Sets up Python 3.13
+- Installs dependencies
+- Runs pytest test suite (5 tests covering all endpoints)
+
+See the badge at the top of this README for current build status.
+
 ## Tech Stack
 
 - Python 3.13
@@ -106,22 +118,24 @@ Test the containerized API at http://localhost:8000/docs
 - scikit-learn - metrics, preprocessing
 - NumPy / pandas - data handling
 - Docker - containerization
+- GitHub Actions - CI/CD
 - Render - cloud deployment (Docker runtime)
 
 ## Project Structure
 
-- main.py                 - FastAPI application
-- milk_model.keras        - Trained TensorFlow model
-- target_scaler.pkl       - StandardScaler for targets
-- requirements.txt        - Python dependencies
-- Dockerfile              - Docker build recipe
-- .dockerignore           - Files excluded from Docker build
-- .python-version         - Python 3.13.5 pin
-- .gitignore              - Git ignore rules
-- LICENSE                 - MIT License
-- README.md               - This file
-- notebooks/
-  - training.ipynb        - Full training pipeline
+- main.py                      - FastAPI application
+- test_api.py                  - Pytest test suite (5 tests)
+- milk_model.keras             - Trained TensorFlow model
+- target_scaler.pkl            - StandardScaler for targets
+- requirements.txt             - Python dependencies
+- Dockerfile                   - Docker build recipe
+- .dockerignore                - Files excluded from Docker build
+- .python-version              - Python 3.13.5 pin
+- .gitignore                   - Git ignore rules
+- LICENSE                      - MIT License
+- README.md                    - This file
+- .github/workflows/ci.yml     - GitHub Actions CI pipeline
+- notebooks/training.ipynb     - Full training pipeline
 
 ## How to Run Locally
 
@@ -153,6 +167,10 @@ Option 2 - Docker:
    docker run -p 8000:8000 milk-api
 
 3. Open the interactive docs at http://localhost:8000/docs
+
+Option 3 - Run tests:
+
+   pytest test_api.py -v
 
 ## Author
 
