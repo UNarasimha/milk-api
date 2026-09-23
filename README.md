@@ -47,6 +47,18 @@ Outputs: Fat, Protein, Lactose
 
 Interpretation: Fat is highly predictable from NIR data (strong absorption bands). Protein and Lactose show weaker predictability due to overlapping water absorption bands — consistent with published NIR spectroscopy literature.
 
+## Training Notebook
+
+The complete training pipeline is available at `notebooks/training.ipynb`. It includes:
+
+- Data loading and exploration
+- Absorbance calculation from raw transmittance
+- SNV normalization
+- Train/validation/test split with target scaling
+- Model building with the Keras Sequential API
+- Training with EarlyStopping, ReduceLROnPlateau, and ModelCheckpoint
+- Evaluation (RMSE, MAE, R2) and prediction plots
+
 ## Deployment
 
 The trained model is served as a REST API using FastAPI, deployed on Render.
@@ -83,14 +95,16 @@ Note: The free Render instance spins down after 15 minutes of inactivity. First 
 
 ## Project Structure
 
-- main.py            - FastAPI application
-- milk_model.keras   - Trained TensorFlow model
-- target_scaler.pkl  - StandardScaler for targets
-- requirements.txt   - Python dependencies
-- .python-version    - Python 3.13.5 pin for Render
-- .gitignore         - Git ignore rules
-- LICENSE            - MIT License
-- README.md          - This file
+- main.py                 - FastAPI application
+- milk_model.keras        - Trained TensorFlow model
+- target_scaler.pkl       - StandardScaler for targets
+- requirements.txt        - Python dependencies
+- .python-version         - Python 3.13.5 pin for Render
+- .gitignore              - Git ignore rules
+- LICENSE                 - MIT License
+- README.md               - This file
+- notebooks/
+  - training.ipynb        - Full training pipeline (data loading, preprocessing, model, evaluation)
 
 ## How to Run Locally
 
