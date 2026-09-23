@@ -2,8 +2,8 @@
 
 An end-to-end TensorFlow project that predicts Fat, Protein, and Lactose content in raw milk directly from Near-Infrared (NIR) spectroscopy data — enabling real-time, non-destructive milk quality analysis on the farm.
 
-**Live API:** https://milk-api-zmr9.onrender.com
-**Interactive Docs:** https://milk-api-zmr9.onrender.com/docs
+**Live API:** https://milk-api-docker.onrender.com
+**Interactive Docs:** https://milk-api-docker.onrender.com/docs
 
 ## Problem Statement
 
@@ -61,10 +61,10 @@ The complete training pipeline is available at `notebooks/training.ipynb`. It in
 
 ## Deployment
 
-The trained model is served as a REST API using FastAPI, deployed on Render.
+The trained model is served as a REST API using FastAPI, containerized with Docker, and deployed on Render.
 
-**Live API:** https://milk-api-zmr9.onrender.com
-**Interactive Docs:** https://milk-api-zmr9.onrender.com/docs
+**Live API:** https://milk-api-docker.onrender.com
+**Interactive Docs:** https://milk-api-docker.onrender.com/docs
 
 Endpoints:
 
@@ -75,13 +75,27 @@ Endpoints:
 
 Example Request (public API):
 
-curl -X POST "https://milk-api-zmr9.onrender.com/predict" -H "Content-Type: application/json" -d "{\"spectra\": [0.01, 0.02, 0.55]}"
+curl -X POST "https://milk-api-docker.onrender.com/predict" -H "Content-Type: application/json" -d "{\"spectra\": [0.01, 0.02, 0.55]}"
 
 Example Response:
 
-{"Fat": 2.814, "Prot": 3.208, "Lact": 4.719}
+{"Fat": 3.547, "Prot": 3.407, "Lact": 4.724}
 
 Note: The free Render instance spins down after 15 minutes of inactivity. First request after idle may take up to 50 seconds.
+
+## Docker
+
+The application is containerized with a multi-layer Docker image based on `python:3.13-slim`.
+
+Build locally:
+
+  docker build -t milk-api .
+
+Run the container:
+
+  docker run -p 8000:8000 milk-api
+
+Test the containerized API at http://localhost:8000/docs
 
 ## Tech Stack
 
@@ -91,7 +105,8 @@ Note: The free Render instance spins down after 15 minutes of inactivity. First 
 - Uvicorn - ASGI server
 - scikit-learn - metrics, preprocessing
 - NumPy / pandas - data handling
-- Render - cloud deployment
+- Docker - containerization
+- Render - cloud deployment (Docker runtime)
 
 ## Project Structure
 
@@ -99,14 +114,18 @@ Note: The free Render instance spins down after 15 minutes of inactivity. First 
 - milk_model.keras        - Trained TensorFlow model
 - target_scaler.pkl       - StandardScaler for targets
 - requirements.txt        - Python dependencies
-- .python-version         - Python 3.13.5 pin for Render
+- Dockerfile              - Docker build recipe
+- .dockerignore           - Files excluded from Docker build
+- .python-version         - Python 3.13.5 pin
 - .gitignore              - Git ignore rules
 - LICENSE                 - MIT License
 - README.md               - This file
 - notebooks/
-  - training.ipynb        - Full training pipeline (data loading, preprocessing, model, evaluation)
+  - training.ipynb        - Full training pipeline
 
 ## How to Run Locally
+
+Option 1 - Python virtual environment:
 
 1. Clone the repository:
 
@@ -122,6 +141,18 @@ Note: The free Render instance spins down after 15 minutes of inactivity. First 
    python -m uvicorn main:app --reload --port 8000
 
 4. Open the interactive docs at http://127.0.0.1:8000/docs
+
+Option 2 - Docker:
+
+1. Build the image:
+
+   docker build -t milk-api .
+
+2. Run the container:
+
+   docker run -p 8000:8000 milk-api
+
+3. Open the interactive docs at http://localhost:8000/docs
 
 ## Author
 
