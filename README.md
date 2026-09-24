@@ -49,6 +49,41 @@ Outputs: Fat, Protein, Lactose
 
 Interpretation: Fat is highly predictable from NIR data (strong absorption bands). Protein and Lactose show weaker predictability due to overlapping water absorption bands — consistent with published NIR spectroscopy literature.
 
+## Hyperparameter Tuning (Optuna)
+
+I ran a systematic hyperparameter search with Optuna (30 trials, Tree-Structured Parzen Estimator sampler) to tune five hyperparameters:
+
+| Hyperparameter | Search Space |
+|---------------|--------------|
+| Learning rate | 1e-4 to 1e-2 (log) |
+| Layer 1 size | 64, 128, 256 |
+| Layer 2 size | 32, 64, 128 |
+| Dropout | 0.1 to 0.5 |
+| Batch size | 16, 32, 64 |
+
+**Best parameters found:**
+- Learning rate: 0.000121
+- Layer 1: 128, Layer 2: 64
+- Dropout: 0.146
+- Batch size: 16
+
+**Comparison of original vs tuned model (test set):**
+
+| Target | Original R2 | Tuned R2 | Change |
+|--------|-------------|----------|--------|
+| Fat | 0.857 | 0.850 | -0.008 |
+| Protein | 0.271 | 0.280 | +0.009 |
+| Lactose | 0.209 | 0.205 | -0.004 |
+
+**Key finding:** Optuna's search confirmed that the manual baseline was already near-optimal. This indicates the performance ceiling is set by the data's signal-to-noise ratio — a physics limitation for NIR spectroscopy of Protein and Lactose — rather than by model architecture or hyperparameters.
+
+**Files:**
+- `tune_optuna.py` — Optuna search script
+- `train_tuned.py` — retrain with best parameters
+- `best_params.json` — best hyperparameters from search
+- `tuning_results.json` — full results of tuning + test evaluation
+- `tuned_model.keras` — model trained with tuned parameters
+
 ## Training Notebook
 
 The complete training pipeline is available at `notebooks/training.ipynb`. It includes:
@@ -117,6 +152,7 @@ See the badge at the top of this README for current build status.
 - Uvicorn - ASGI server
 - scikit-learn - metrics, preprocessing
 - NumPy / pandas - data handling
+- Optuna - hyperparameter tuning
 - Docker - containerization
 - GitHub Actions - CI/CD
 - Render - cloud deployment (Docker runtime)
@@ -125,9 +161,14 @@ See the badge at the top of this README for current build status.
 
 - main.py                      - FastAPI application
 - test_api.py                  - Pytest test suite (5 tests)
-- milk_model.keras             - Trained TensorFlow model
+- milk_model.keras             - Original trained model (deployed)
+- tuned_model.keras            - Optuna-tuned model
 - target_scaler.pkl            - StandardScaler for targets
 - requirements.txt             - Python dependencies
+- tune_optuna.py               - Optuna hyperparameter search
+- train_tuned.py               - Retrain with best parameters
+- best_params.json             - Best hyperparameters found
+- tuning_results.json          - Full tuning + test results
 - Dockerfile                   - Docker build recipe
 - .dockerignore                - Files excluded from Docker build
 - .python-version              - Python 3.13.5 pin
@@ -171,6 +212,11 @@ Option 2 - Docker:
 Option 3 - Run tests:
 
    pytest test_api.py -v
+
+Option 4 - Hyperparameter tuning:
+
+   python tune_optuna.py
+   python train_tuned.py
 
 ## Author
 
